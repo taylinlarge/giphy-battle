@@ -1,41 +1,31 @@
 <template>
 	<div id="app">
-		<router-view @usernameentered="setUsername" :username="username" :prompt="prompt"/>
+		<router-view @usernameentered="setUsername" @submittedgiphy="selectedGiphy" :username="username" :responsedata="responseData"/>
 	</div>
 </template>
 
 <script>
 import axios from 'axios'
+const baseURL = 'http://circuslabs.net:6432';
 export default {
 	name: 'App',
 	data: function() {
-		let responseData = {
-			username: localStorage.getItem('username'),
-			currentSubmissions: [],
-			prompt: '',
-			timeLeft: '',
-		}
+		let username = localStorage.getItem('username');
+		let responseData = {};
 
-		return { responseData };
+		return { username, responseData };
 	},
 	created() {
 		this.getData();
+		var refresh = setInterval(() => { this.getData() }, 1000);
 	},
 	methods: {
 		getData: function() {
-			let baseURL = 'http://circuslabs.net:6432';
 			axios.get(baseURL + '/status')
 			.then((response) => {
 				console.log(response);
-				this.prompt = response.data.question;
-				this.timeLeft = response.data.timeLeftInPhase;
-
-				if (response && response.data && response.data.submissions) {
-					this.currentSubmissions = response.data.submissions;
-				} else {
-					this.currentSubmissions = [];
-				}
-				console.log(this.prompt, this.timeLeft, this.currentSubmissions, this.username);
+				this.responseData = response;
+				console.log(this.responseData)
 			})
 			.catch((error) => {
 				console.warn(error);
@@ -45,6 +35,16 @@ export default {
 			this.username = chosenUsername;
 			localStorage.setItem('username', this.username);
 			console.log('username', this.username);
+		},
+		selectedGiphy: function(giphyURL) {
+			axios.post(baseURL + '/submission', {giphyURL: giphyURL, username: this.username})
+			.then((response) => {
+				console.log(response);
+				// this.getData();
+			})
+			.catch((error) => {
+				console.warn(error);
+			});
 		}
 	},
 }

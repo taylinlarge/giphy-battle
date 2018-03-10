@@ -14,7 +14,6 @@ export default {
 	},
 	watch: {
 		chosenUsername: function() {
-			// console.log('username passed', this.chosenUsername);
 			this.$emit('usernameentered', this.chosenUsername);
 		}
 	}

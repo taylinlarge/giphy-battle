@@ -1,12 +1,14 @@
 <template>
 	<div>
 		<router-link to="/submissions">back</router-link>
-		<p>{{prompt}}</p>
+		<p v-if="this.responsedata.data.question">{{this.responsedata.data.question}}</p>
 		<p>Find Giphy comp</p>
 		<input v-model="searchText">
 		<ul>
-			<li v-bind:key="index" v-for="(giphs, index) in giphys">
-				<img :src="giphs.images.original.url" alt="" :id="giphs.id" @click="submitGiphy">
+			<li v-bind:key="index" v-for="(gif, index) in giphys">
+				<router-link to="/submissions">
+					<img :src="gif.images.original.url" alt="" @click="submitGiphy(gif.images.original.url)" link-to="/submissions">
+				</router-link>
 			</li>
 		</ul>
 	</div>
@@ -20,8 +22,10 @@ export default {
 		return {
 			searchText: '',
 			giphys: [],
-			giphyID: '',
-		}
+			giphyURL: '',
+			// question: this.responsedata.data.question,
+			// timeLeft: this.responsedata.data.timeLeftInPhase,
+		};
 	},
 	watch: {
 		searchText: function() {
@@ -37,18 +41,18 @@ export default {
 			.then((response) => {
 				console.log(response);
 				this.giphys = response.data.data;
-				// this.giphyID = this.giphys
 				console.log(this.giphys);
 			})
 			.catch((error) => {
 				console.warn(error);
 			});
 		},
-		submitGiphy: function(e) {
-			// console.log(e.currentTarget.);
+		submitGiphy: function(giphyURL) {
+			console.log('console log from submitGiphy');
+			this.$emit('submittedgiphy', giphyURL);
 		}
 	},
-	props: ['prompt']
+	props: ['responsedata']
 }
 </script>
 
